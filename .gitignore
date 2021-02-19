@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# User
+data/cvponline_extract
+data/featurized_sentences
+data/knowledge_base
+data/pub_med_json
+data/pubmed_packed
+data/statistic
+data/tagged_sentences

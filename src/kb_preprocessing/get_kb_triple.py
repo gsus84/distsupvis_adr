@@ -31,7 +31,18 @@ def get_drug_names_by_suffix(
     return drug_name_token_list
 
 
-if __name__ == "__main__":
+def create_kb_triple(
+        med_suffix_path: str = "data/helper/medicament_suffixes.txt",
+        react_drug_pairs_path: str = "data/knowledge_base/"
+                                     "reaction_drug_brand_pairs.txt",
+        drug_name_filtered_path: str = "data/knowledge_base/"
+                                       "drug_names_suffix_filtered.json",
+        react_target_path: str = "data/knowledge_base/reactions.json",
+        rel_drug_react_targ_path: str = "data/knowledge_base/"
+                                        "rel_drug_react_triple.json",
+        stat_path: str = "data/statistic/"
+                         "knowledge_base_extraction_statistic.json"
+):
     drug_name_filter_stat = Counter()
     drug_brands_reactions = []
     brand_names = set()
@@ -39,7 +50,7 @@ if __name__ == "__main__":
     split_characters = re.compile(r"[;/\s,]")
     remove_characters = re.compile(r"[^\w-]")
 
-    with open("../../data/knowledge_base/medicament_suffixes.txt", "r") as f:
+    with open(med_suffix_path, "r") as f:
         suffixes = [suffix.replace("\n", "").lower().strip() for suffix in
                     f.readlines()]
 
@@ -47,7 +58,7 @@ if __name__ == "__main__":
 
     # Load drug reaction tuples
     with open(
-            "../../data/knowledge_base/reaction_drug_brand_pairs.txt", "r"
+            react_drug_pairs_path, "r"
     ) as in_file:
         for line in in_file:
             line = line.replace("\"", "")
@@ -97,7 +108,7 @@ if __name__ == "__main__":
     print("#################")
     print(drug_name_filter_stat)
     with open(
-            "../../data/knowledge_base/drug_names_suffix_filtered.json", "w"
+            drug_name_filtered_path, "w"
     ) as json_file:
         json.dump(
             sorted(list(suffix_filtered_drug_names)), json_file,
@@ -138,16 +149,16 @@ if __name__ == "__main__":
     for _, _, reaction in rel_drug_reaction_triple:
         all_relations.add(reaction.lower())
 
-    with open("../../data/knowledge_base/reactions.json", "w") as json_file:
+    with open(react_target_path, "w") as json_file:
         json.dump(sorted(list(all_relations)), json_file, indent=2)
 
     with open(
-            "../../data/knowledge_base/rel_drug_react_triple.json", "w"
+            rel_drug_react_targ_path, "w"
     ) as json_file:
         json.dump(list(rel_drug_reaction_triple), json_file, indent=2)
 
     with open(
-            "../../data/statistic/knowledge_base_extraction_statistic.json", "w"
+            stat_path, "w"
     ) as json_file:
         json.dump(drug_name_filter_stat, json_file, indent=4, sort_keys=True)
 

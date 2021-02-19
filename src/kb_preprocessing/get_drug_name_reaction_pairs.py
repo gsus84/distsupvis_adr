@@ -6,10 +6,16 @@ from src.models.knowlegde_base import CVPReaction
 from src.kb_preprocessing.utils import extract_cvponline_file_data
 
 
-if __name__ == "__main__":
+def create_drug_name_reaction_pairs(
+        react_data_path="../../data/cvponline_extract_20191231/reactions.txt",
+        report_drug_path="../../data/"
+                         "cvponline_extract_20191231/report_drug.txt",
+        react_drug_pair_targ_path="../../data/knowledge_base/"
+                                  "reaction_drug_brand_pairs.txt"
+):
     # Get relevant cvp reaction data
     reactions = extract_cvponline_file_data(
-        "../../data/cvponline_extract_20191231/reactions.txt",
+        react_data_path,
         [0, 1, 5, 7],
         CVPReaction
     )
@@ -21,7 +27,7 @@ if __name__ == "__main__":
 
     # Get relevant drug report data
     report_drug = extract_cvponline_file_data(
-        "../../data/cvponline_extract_20191231/report_drug.txt",
+        report_drug_path,
         [0, 1, 3],
         CVPReportDrug
     )
@@ -61,6 +67,8 @@ if __name__ == "__main__":
         except KeyError:
             print(f"WARNING: No entry for reaction {reaction}")
 
-    with open("../../data/knowledge_base/reaction_drug_brand_pairs.txt", "w") as f:
+    with open(
+            react_drug_pair_targ_path, "w"
+    ) as f:
         for drug_reaction in drug_reactions:
             f.write("$".join(drug_reaction) + "\n")
