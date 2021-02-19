@@ -110,12 +110,12 @@ def convert_medline_gzip_to_json(input_file: str, output_file):
 
 def pubmed_pack_to_json(
         start: int = 1,
-        end: int = 1,
-        in_path: str = "data/pubmed_packed/pubmed20n",
-        out_path: str = "data/pubmed_json/pubmed20n"
+        end: int = 2,
+        in_path: str = "data/pubmed_packed/pubmed21n",
+        out_path: str = "data/pubmed_json/pubmed21n"
 ):
 
-    for i in range(start, end + 1):
+    for i in range(start, end):
         s_i = str(i)
         zeros = "0" * (4 - len(s_i))
         input_file = in_path + zeros + s_i + ".xml.gz"

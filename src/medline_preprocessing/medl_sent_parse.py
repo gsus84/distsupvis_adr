@@ -59,7 +59,7 @@ class MedlineTagStatistic:
 
     def write_all(
             self, file_name: str,
-            file_path: str = "../../data/statistic/tag_stats/"):
+            file_path: str = "data/statistic/tag_stats/"):
         with open(file_path + file_name, "w") as json_file:
             json.dump(self.__dict__, json_file, indent=2)
 
@@ -68,7 +68,7 @@ class MedlineTagger:
 
     def __init__(
         self, drugnames: Set[str], reactions: Dict[str, List[List[str]]],
-        tag_targed_path: str = "../../data/tagged_sentences/"
+        tag_targed_path: str = "data/tagged_sentences/"
     ):
         self.drugnames = drugnames
         self.reactions = reactions
@@ -145,7 +145,7 @@ class MedlineTagger:
             self.tag_stat.tagged_reactions[reaction] += 1
 
     def tag_medline_file_articles(
-            self, file_name: str, path: str = "../../data/pubmed_json/"):
+            self, file_name: str, path: str = "data/pubmed_json/"):
         with open(path + file_name, "r") as json_file:
             medline_data = json.load(json_file)
         self.tag_stat.clear_all()
@@ -169,32 +169,37 @@ class MedlineTagger:
         self.tag_stat.clear_all()
 
 
-if __name__ == "__main__":
+def parse_sents(
+        start_index: int = 1,
+        end_index: int = 2,
+        react_dict_path: str = "data/knowledge_base/reactions_dict.json",
+        drug_name_file_path: str = "data/knowledge_base/"
+                                   "drug_names_suffix_filtered.json",
+        output_path_base: str = "pubmed21n{}.json",
+        json_src_path: str = "data/pubmed_json/"
+):
     with open(
-            "../../data/knowledge_base/reactions_dict.json", "r"
+           react_dict_path, "r"
     ) as json_file:
         sorted_reactions = json.load(json_file)
     print("reactions keys:", sorted_reactions.keys())
     with open(
-            "../../data/knowledge_base/drug_names_suffix_filtered.json", "r"
+            drug_name_file_path, "r"
     ) as json_file:
         drug_names = set(json.load(json_file))
     print("number drug_names:", len(drug_names))
 
-    tagged_sents = []
 
     medline_tagger = MedlineTagger(
         drugnames=drug_names, reactions=sorted_reactions)
 
-    for medl_file_number in range(993, 1017):
-        tagged_sentences = []
-
+    for medl_file_number in range(start_index, end_index):
         s_i = str(medl_file_number)
         zeros = "0" * (4 - len(s_i))
-        medl_file = f"pubmed20n{zeros + s_i}.json"
+        medl_file = output_path_base.format(zeros + s_i)
 
         medline_tagger.tag_medline_file_articles(
-            medl_file
+            medl_file, path=json_src_path
         )
 
 

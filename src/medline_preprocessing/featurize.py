@@ -386,7 +386,7 @@ class SentenceFeaturerizer:
         sents_drug_react = []
         for sent in tagged_sents:
             sents_drug_react.extend(
-                sent_featurizer.featurize_sentence(
+                self.featurize_sentence(
                     sent["pmid"],
                     sent["sentence"],
                     sent["drug_entities"],
@@ -400,20 +400,22 @@ class SentenceFeaturerizer:
             self,
             start: int,
             end: int,
-            medl_src_path: str = "../../data/tagged_sentences/",
-            target_path: str = "../../data/featurized_sentences/",
-            target_stat_path: str = "../../data/statistic/featurize_stat/"
+            medl_src_path: str = "data/tagged_sentences/",
+            target_path: str = "data/featurized_sentences/",
+            target_stat_path: str = "data/statistic/featurize_stat/",
+            tag_sent_file_base: str = "tagged_pubmed21n{}.json",
+            feat_sent_file_base: str = "featurized_sents_pubmed21n{}{}.json"
     ):
         for file_number in range(start, end):
             s_i = str(file_number)
             zeros = "0" * (4 - len(s_i))
-            tagged_sent_file = f"tagged_pubmed20n{zeros + s_i}.json"
+            tagged_sent_file = tag_sent_file_base.format(zeros + s_i)
             tagged_sents = self.featurize_file_sents(
                 medl_src_path + tagged_sent_file
             )
             with open(
                 target_path +
-                f"featurized_sents_pubmed20n{zeros + s_i}.json",
+                feat_sent_file_base.format("zeros + s_i", ""),
                 "w"
             ) as json_file:
                 json.dump(
@@ -423,7 +425,7 @@ class SentenceFeaturerizer:
                 )
             self.write_statistic(
                 target_stat_path +
-                f"featurized_sents_pubmed20n{zeros + s_i}_stat.json",
+                feat_sent_file_base.format(zeros + s_i, "_stat")
             )
 
 
