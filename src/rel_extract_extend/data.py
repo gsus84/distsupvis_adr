@@ -7,7 +7,7 @@ from typing import List
 
 from collections import Counter
 
-from lib.rel_ext import Dataset
+from dist_sup_lib.rel_ext import Dataset
 
 
 class DatasetExt(Dataset):

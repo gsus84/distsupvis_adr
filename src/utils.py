@@ -1,10 +1,10 @@
 import os
 import json
 
-from lib.rel_ext import Example
-from lib.rel_ext import KBTriple
-from lib.rel_ext import Corpus
-from lib.rel_ext import KB
+from dist_sup_lib.rel_ext import Example
+from dist_sup_lib.rel_ext import KBTriple
+from dist_sup_lib.rel_ext import Corpus
+from dist_sup_lib.rel_ext import KB
 
 
 def read_examples(src_filename):
