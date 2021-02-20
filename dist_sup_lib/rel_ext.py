@@ -17,6 +17,9 @@ Example = namedtuple('Example',
     'entity_1, entity_2, left, mention_1, middle, mention_2, right, '
     'left_POS, mention_1_POS, middle_POS, mention_2_POS, right_POS')
 
+RelSetup = namedtuple(
+    "RelSetup", "relation, pos_examples, neg_examples")
+
 
 class Corpus(object):
     """Class for representing and working with the raw text we use
@@ -45,6 +48,9 @@ class Corpus(object):
             self.examples = src_filename_or_examples
         self.examples_by_entities = {}
         self._index_examples_by_entities()
+
+    def __add__(self, other):
+        return Corpus(self.examples + other.examples)
 
     @staticmethod
     def read_examples(src_filename):
@@ -156,6 +162,9 @@ class KB(object):
         self._index_kb_triples_by_relation()
         self._index_kb_triples_by_entities()
 
+    def __add__(self, other):
+        return KB(self.kb_triples + other.kb_triples)
+
     @staticmethod
     def read_kb_triples(src_filename):
         """Read `src_filename`, assumed to be a `gzip` file with
@@ -239,6 +248,12 @@ class Dataset(object):
     def __init__(self, corpus, kb):
         self.corpus = corpus
         self.kb = kb
+
+    def __add__(self, other):
+        return Dataset(
+            self.corpus + other.corpus,
+            self.kb + other.kb
+        )
 
     def find_unrelated_pairs(self):
         unrelated_pairs = set()
@@ -333,6 +348,7 @@ class Dataset(object):
             unrelated_pairs, int(sampling_rate * len(unrelated_pairs)))
         kbts_by_rel = defaultdict(list)
         labels_by_rel = defaultdict(list)
+        data_setup = []
         for index, rel in enumerate(self.kb.all_relations):
             if include_positive:
                 for kbt in self.kb.get_triples_for_relation(rel):
@@ -341,6 +357,14 @@ class Dataset(object):
             for sbj, obj in unrelated_pairs:
                 kbts_by_rel[rel].append(KBTriple(rel, sbj, obj))
                 labels_by_rel[rel].append(False)
+            data_setup.append(
+                RelSetup(
+                    rel,
+                    len(self.kb.get_triples_for_relation(rel)),
+                    len(unrelated_pairs),
+                )
+            )
+            """
             print("#####################")
             print(
                 f"relation: {rel} \n"
@@ -353,8 +377,8 @@ class Dataset(object):
             )
             print("-----------------------")
             print(f"number unrelated pairs: {len(unrelated_pairs)}")
-            print("unrelated examples:\n", unrelated_pairs[:10])
-        return kbts_by_rel, labels_by_rel
+            print("unrelated examples:\n", unrelated_pairs[:10])"""
+        return kbts_by_rel, labels_by_rel, data_setup
 
     def build_splits(self,
             split_names=['tiny', 'train', 'dev'],
@@ -471,7 +495,8 @@ def macro_average_results(results):
 
 
 def evaluate(splits, classifier, test_split='dev', sampling_rate=0.1, verbose=True, beta=1):
-    test_kbts_by_rel, true_labels_by_rel = splits[test_split].build_dataset(sampling_rate=sampling_rate)
+    test_kbts_by_rel, true_labels_by_rel, test_setup = splits[
+        test_split].build_dataset(sampling_rate=sampling_rate)
     results = {}
     if verbose:
         print_statistics_header()
@@ -490,7 +515,7 @@ def evaluate(splits, classifier, test_split='dev', sampling_rate=0.1, verbose=Tr
     avg_result = macro_average_results(results)
     if verbose:
         print_statistics_footer(avg_result)
-    return avg_result[2]  # return f_0.5 score as summary statistic
+    return avg_result, test_setup  # [2]  # return f_0.5 score as summary statistic
 
 
 def train_models(
@@ -503,7 +528,7 @@ def train_models(
         vectorize=True,
         verbose=True):
     train_dataset = splits[split_name]
-    train_o, train_y = train_dataset.build_dataset(sampling_rate=sampling_rate)
+    train_o, train_y, train_setup = train_dataset.build_dataset(sampling_rate=sampling_rate)
     train_X, vectorizer = train_dataset.featurize(
         train_o, featurizers, vectorize=vectorize)
     models = {}
@@ -525,12 +550,15 @@ def train_models(
         'vectorizer': vectorizer,
         'models': models,
         'all_relations': splits['all'].kb.all_relations,
-        'vectorize': vectorize}
+        'vectorize': vectorize,
+        'train_setup': train_setup
+    }
 
 
 def predict(splits, train_result, split_name='dev', sampling_rate=0.1, vectorize=True):
     assess_dataset = splits[split_name]
-    assess_o, assess_y = assess_dataset.build_dataset(sampling_rate=sampling_rate)
+    assess_o, assess_y, predict_setup = assess_dataset.build_dataset(
+        sampling_rate=sampling_rate)
     test_X, _ = assess_dataset.featurize(
         assess_o,
         featurizers=train_result['featurizers'],
@@ -544,10 +572,12 @@ def predict(splits, train_result, split_name='dev', sampling_rate=0.1, vectorize
                 predictions[rel] = train_result['models'][rel].predict(test_X[rel])
         except KeyError:
             print(f"WARNING: No entries for '{rel}")
-    return predictions, assess_y
+    return predictions, assess_y, predict_setup
 
 
-def evaluate_predictions(predictions, test_y, verbose=True, beta=1):
+def evaluate_predictions(
+        predictions, test_y, verbose=True, beta=1, avg_results=True
+):
     results = {}  # one result row for each relation
     if verbose:
         print_statistics_header()
@@ -560,10 +590,14 @@ def evaluate_predictions(predictions, test_y, verbose=True, beta=1):
         results[rel] = stats
         if verbose:
             print_statistics_row(rel, results[rel])
-    avg_result = macro_average_results(results)
+    results["avg_result"] = macro_average_results(results)
+
     if verbose:
-        print_statistics_footer(avg_result)
-    return avg_result[2]  # return f_0.5 score as summary statistic
+        print_statistics_footer(results["avg_result"])
+    if avg_results:
+        return results["avg_result"]  # [2]  # return f_0.5 score as summary statistic
+    return results
+
 
 
 def experiment(

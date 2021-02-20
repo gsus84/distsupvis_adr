@@ -74,3 +74,9 @@ class DatasetExt(Dataset):
         })
         return total_drug_react_counter
 
+    def __add__(self, other: Dataset):
+        temp = Dataset(self.corpus, self.kb)
+        temp.corpus += other.corpus
+        temp.kb += other.kb
+        return temp
+
