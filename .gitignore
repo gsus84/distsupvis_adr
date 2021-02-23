@@ -136,3 +136,8 @@ data/pubmed_json
 data/pubmed_packed
 data/statistic
 data/tagged_sentences
+calc_set_sizes.ipynb
+data/results.json
+data/test_setup.json
+data/train_setup.json
+
