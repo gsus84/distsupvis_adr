@@ -4,4 +4,8 @@ This project contains the code for the bachelor thesis: "Extraktion von Medikame
 
 1. Execute code in `project_preparation.ipynb`. Be aware that some steps can take many hours if you want to use many data files
 2. Execute code in `data_revision_proto.ipynb`
-3. Now you can train and evaluate the classifier in `train_0-200_sample_rate_0p1.ipynb` and `train_0-200_sample_rate_0p5.ipynb`
+3. Now you can train and evaluate the classifier in
+* `train_0-200_sample_rate_0p1.ipynb`
+* `train_0-200_sample_rate_0p5.ipynb`
+* `experiment_kfold_val_0-200_sample_rate_0p1.ipynb`
+* `experiment_kfold_val_0-200_sample_rate_0p5.ipynb`
