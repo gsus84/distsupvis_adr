@@ -415,7 +415,7 @@ class SentenceFeaturerizer:
             )
             with open(
                 target_path +
-                feat_sent_file_base.format("zeros + s_i", ""),
+                feat_sent_file_base.format(zeros + s_i, ""),
                 "w"
             ) as json_file:
                 json.dump(
