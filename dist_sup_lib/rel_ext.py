@@ -679,7 +679,7 @@ def find_new_relation_instances(
         vectorize=vectorize,
         verbose=True)
     test_split = splits[test_split]
-    neg_o, neg_y = test_split.build_dataset(
+    neg_o, neg_y, _ = test_split.build_dataset(
         include_positive=False,
         sampling_rate=1.0)
     neg_X, _ = test_split.featurize(
@@ -705,7 +705,7 @@ def bake_off_experiment(train_result, rel_ext_data_home, verbose=True):
     corpus = Corpus(test_corpus_filename)
     kb = KB(test_kb_filename)
     test_dataset = Dataset(corpus, kb)
-    test_o, test_y = test_dataset.build_dataset()
+    test_o, test_y, _ = test_dataset.build_dataset()
     test_X, _ = test_dataset.featurize(
         test_o,
         featurizers=train_result['featurizers'],
