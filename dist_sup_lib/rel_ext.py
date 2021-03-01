@@ -621,7 +621,7 @@ def experiment(
         vectorize=vectorize,
         verbose=verbose)
     print("============= Predict =============")
-    predictions, test_y = predict(
+    predictions, test_y, _ = predict(
         splits,
         train_result,
         split_name=test_split,
